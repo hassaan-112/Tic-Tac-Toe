@@ -1,4 +1,3 @@
-# before adding optimization to AI
 import streamlit as st
 import numpy as np
 import random as r
