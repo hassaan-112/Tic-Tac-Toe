@@ -12,10 +12,17 @@ def ai_turn(board):
         return ai_turn(board)
     else:
         return [i,j]
+
+def optimized_ai(board):
+    if guess_location(board,2):
+        return guess_location(board,2)
+    elif guess_location(board,1):
+        return guess_location(board,1)
+    else:
+        return ai_turn(board)
+
     
 def check_state(board):
-    if not any(board[i, j] == 0 for i in range(3) for j in range(3)):
-        return 0
     for i in range(3): 
         if all(board[i,j]==1 for j in range (3)):#check rows for P1
             return 1
@@ -32,9 +39,38 @@ def check_state(board):
     if all(board[i,j]==1 for i,j in zip(range(3),range(2,-1,-1))):#check other diag for 1
         return 1
     if all(board[i,j]==2 for i,j in zip(range(3),range(2,-1,-1))):#check other diag for 2
-        return 2      
-    
+        return 2    
+    if not any(board[i, j] == 0 for i in range(3) for j in range(3)):
+        return 0
 
+def guess_location(board,typ):
+    for i in range(3):
+        if board[i,0]==typ and board[i,1]==typ and board[i,2]==0:
+            return [i,2]
+        elif board[i,0]==typ and board[i,1]==0 and board[i,2]==typ:
+            return [i,1]
+        elif board[i,0]==0 and board[i,1]==typ and board[i,2]==typ:
+            return [i,1]
+        elif board[0,i]==typ and board[1,i]==typ and board[2,i]==0:
+            return [2,i]
+        elif board[0,i]==typ and board[1,i]==0 and board[2,i]==typ:
+            return [1,i]
+        elif board[0,i]==0 and board[1,i]==typ and board[2,i]==typ:
+            return [0,i]
+    if board[0,0]==typ and board[1,1]==typ and board[2,2]==0:
+        return [2,2]
+    elif board[0,0]==typ and board[1,1]==0 and board[2,2]==typ:
+        return [1,1]
+    elif board[0,0]==0 and board[1,1]==typ and board[2,2]==typ:
+        return [0,0]
+    elif board[0,2]==typ and board[1,1]==typ and board[2,0]==0:
+        return [2,0]
+    elif board[0,2]==typ and board[1,1]==0 and board[2,0]==typ:
+        return [1,1]
+    elif board[0,2]==0 and board[1,1]==typ and board[2,0]==typ:
+        return [0,2]
+    return None
+    
 
 # setting board and player
 if 'board' not in st.session_state:
@@ -67,7 +103,7 @@ if st.session_state.current_player == 1 and st.session_state.status:   # turn in
     st.write("Player 1's turn") 
 elif st.session_state.current_player == 2 and st.session_state.status and not st.session_state.AI:
     st.write("Player 2's turn") 
-else:
+elif st.session_state.current_player == 2 and st.session_state.status and st.session_state.AI:
     st.write("AI's turn") 
     
 for row in range(3):         # turn and save
@@ -89,7 +125,7 @@ for row in range(3):         # turn and save
                     st.session_state.current_player=1
                 st.rerun()
 if st.session_state.AI and st.session_state.current_player==2 and  st.session_state.status:
-    ret=ai_turn(st.session_state.board)
+    ret=optimized_ai(st.session_state.board)
     time.sleep(1)
     st.session_state.board[ret[0],ret[1]] =2
     st.session_state.current_player=1
@@ -98,3 +134,4 @@ if st.session_state.AI and st.session_state.current_player==2 and  st.session_st
 if st.button("Reset"):   # reset button
     st.session_state.clear()
     st.rerun()
+    
