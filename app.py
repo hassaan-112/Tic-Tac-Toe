@@ -12,6 +12,15 @@ def ai_turn(board):
         return ai_turn(board)
     else:
         return [i,j]
+
+def optimized_ai(board):
+    if guess_location(board,2):
+        return guess_location(board,2)
+    elif guess_location(board,1):
+        return guess_location(board,1)
+    else:
+        return ai_turn(board)
+
     
 def check_state(board):
     for i in range(3): 
