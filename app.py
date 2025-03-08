@@ -67,7 +67,7 @@ if st.session_state.current_player == 1 and st.session_state.status:   # turn in
     st.write("Player 1's turn") 
 elif st.session_state.current_player == 2 and st.session_state.status and not st.session_state.AI:
     st.write("Player 2's turn") 
-else:
+elif st.session_state.current_player == 2 and st.session_state.status and  st.session_state.AI:
     st.write("AI's turn") 
     
 for row in range(3):         # turn and save
