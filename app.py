@@ -1,28 +1,32 @@
+# before adding optimization to AI
 import streamlit as st
 import numpy as np
 import random as r
 import time
 
-def ai_turn(board):
+
+def random_move(board):
     if check_state(board)==0:
         return [5,5]
     i=r.randint(0,2)
     j=r.randint(0,2)
     if board[i,j]!=0:
-        return ai_turn(board)
+        return random_move(board)
     else:
         return [i,j]
 
-def optimized_ai(board):
-    if guess_location(board,2):
-        return guess_location(board,2)
-    elif guess_location(board,1):
-        return guess_location(board,1)
+def optimized_ai(board):     # ai moves
+    win_move=guess_location(board,2)
+    prevention_move=guess_location(board,1)
+    if win_move:
+        return win_move
+    elif prevention_move:
+        return prevention_move
     else:
-        return ai_turn(board)
+        return random_move(board)
 
     
-def check_state(board):
+def check_state(board):  # check for winning player
     for i in range(3): 
         if all(board[i,j]==1 for j in range (3)):#check rows for P1
             return 1
@@ -43,27 +47,30 @@ def check_state(board):
     if not any(board[i, j] == 0 for i in range(3) for j in range(3)):
         return 0
 
-def guess_location(board,typ):
+def guess_location(board,typ):  # optimal move selector
     for i in range(3):
-        if board[i,0]==typ and board[i,1]==typ and board[i,2]==0:
+        if board[i,0]==typ and board[i,1]==typ and board[i,2]==0:    # check rows for optimal moves
             return [i,2]
         elif board[i,0]==typ and board[i,1]==0 and board[i,2]==typ:
             return [i,1]
         elif board[i,0]==0 and board[i,1]==typ and board[i,2]==typ:
-            return [i,1]
-        elif board[0,i]==typ and board[1,i]==typ and board[2,i]==0:
+            return [i,0]
+            
+        elif board[0,i]==typ and board[1,i]==typ and board[2,i]==0:  # check cols for optimal moves
             return [2,i]
         elif board[0,i]==typ and board[1,i]==0 and board[2,i]==typ:
             return [1,i]
         elif board[0,i]==0 and board[1,i]==typ and board[2,i]==typ:
             return [0,i]
-    if board[0,0]==typ and board[1,1]==typ and board[2,2]==0:
+            
+    if board[0,0]==typ and board[1,1]==typ and board[2,2]==0:       # check main diag for optimal moves
         return [2,2]
     elif board[0,0]==typ and board[1,1]==0 and board[2,2]==typ:
         return [1,1]
     elif board[0,0]==0 and board[1,1]==typ and board[2,2]==typ:
         return [0,0]
-    elif board[0,2]==typ and board[1,1]==typ and board[2,0]==0:
+        
+    elif board[0,2]==typ and board[1,1]==typ and board[2,0]==0:  # check second diag for optimal moves
         return [2,0]
     elif board[0,2]==typ and board[1,1]==0 and board[2,0]==typ:
         return [1,1]
@@ -72,20 +79,22 @@ def guess_location(board,typ):
     return None
     
 
-# setting board and player
 if 'board' not in st.session_state:
     st.session_state.board = np.zeros((3, 3), dtype=int)  
-
 if 'current_player' not in st.session_state:
     st.session_state.current_player = 1  # Player 1 starts
 if 'status' not in st.session_state:
     st.session_state.status = True  
 if 'AI' not in st.session_state:
     st.session_state.AI=True
+if 'selectbox_disabler' not in st.session_state:
+    st.session_state.selectbox_disabler=False
 
-choice=st.selectbox(f"chose opponent {"AI" if st.session_state.AI else "Human"}",["AI","Human"])
+#choice box for opponent selection
+choice=st.selectbox(f"chose opponent {"AI" if st.session_state.AI else "Human"}",["AI","Human"],disabled=st.session_state.selectbox_disabler)
 if choice=="Human":
     st.session_state.AI=False    
+    
 st.title("Tic-Tac-Toe")  # title
 
 if check_state(st.session_state.board)==1:      # game status
@@ -119,14 +128,16 @@ for row in range(3):         # turn and save
         if cols[col].button(label, key=f"{row}-{col}"):
             if st.session_state.board[row, col] == 0 and st.session_state.status:
                 st.session_state.board[row, col] = st.session_state.current_player
+                st.session_state.selectbox_disabler=True
                 if st.session_state.current_player == 1 :
                     st.session_state.current_player = 2  
                 else:
                     st.session_state.current_player=1
                 st.rerun()
-if st.session_state.AI and st.session_state.current_player==2 and  st.session_state.status:
+                
+if st.session_state.AI and st.session_state.current_player==2 and  st.session_state.status:  # ai turn
     ret=optimized_ai(st.session_state.board)
-    time.sleep(1)
+    time.sleep(0.5)
     st.session_state.board[ret[0],ret[1]] =2
     st.session_state.current_player=1
     st.rerun()
